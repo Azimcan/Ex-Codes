@@ -2,39 +2,29 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include<sys/wait.h> 
+#include <sys/wait.h> 
 
-int main(int argc, char const *argv[]){
-	int pid = fork();
-	if(pid == 0){
+int operation(int a, int b){
+	if(fork() == 0){
 		wait(NULL);
-		printf("Child-%d\n",getpid());
-	}
-	else if(fork() == 0){
-		wait(NULL);
-		printf("Child-%d\n",getpid());
-	}
-	else if(fork() == 0){
-		wait(NULL);
-		printf("Child-%d\n",getpid());
-	}
-	else if(fork() == 0){
-		wait(NULL);
-		printf("Child-%d\n",getpid());
-	}
-	else if(fork() == 0){
-		wait(NULL);
-		printf("Child-%d\n",getpid());
-	}
-	else if(fork() == 0){
-		wait(NULL);
-		printf("Child-%d\n", getpid());
+		return a+b;
 	}
 
 	else{
-		wait(&pid);
-		printf("%d\n", pid);
-		printf("Parent-%d\n", getpid());
+		wait(NULL);
+		return a*b;
+	}
+}
+
+int main(int argc, char const *argv[]){
+
+	if(fork() == 0){
+		wait(NULL);
+		printf("Child-%d, Sonuc = %d\n", getpid(), operation(5, 6));
+	}
+	else{
+		wait(NULL);
+		printf("Parent-%d, Sonuc = %d\n", getpid(), operation(1, 2));		
 	}
 /*
 	int pid = fork();
