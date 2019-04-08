@@ -3,14 +3,19 @@ require 'json'
 
 class User
   attr_accessor :username, :client_id
-  
-  def initialize(username, client_id)
+  def initialize(username=nil, client_id=nil)
+
     @username = username
     @client_id = client_id
+
+    @data = { 
+      username: username, 
+      client_id: client_id 
+    }
   end
 
-  def show
-    {"username" => @username, "client_id" => @client_id}
+  def to_s
+    '#{@data}'
   end
 end
 
@@ -56,6 +61,3 @@ class Server
     client_id.puts user.show.to_json
   end
 end
-
-
-Server.new("localhost", 3000)
