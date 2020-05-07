@@ -5,6 +5,6 @@ def approx_pi(throws)
   4.0 * times_inside / throws
 end
  
-[10000000].each do |n| 
+[1].each do |n| 
    puts "%8d samples: PI = %s" % [n, approx_pi(n)]
 end

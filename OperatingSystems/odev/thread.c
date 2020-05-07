@@ -21,11 +21,10 @@ int main(int argc, char *argv[]){
     return(-1);
   }
 
-  pthread_attr_init(&attr);
   void *upper;
 
   for (int i = 0; i < NUM_THREADS; i++){
-    pthread_create(&workers[i], &attr, runner, argv[1]);
+    pthread_create(&workers[i], NULL, runner, argv[1]);
     printf("%d\n", atoi(upper));
   }
   

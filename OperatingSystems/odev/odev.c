@@ -4,7 +4,6 @@
 #include <time.h>
 #include <unistd.h>
 
-int time_arti = 0;
 int hata_counter = 0;
 
 void begin(){
@@ -30,9 +29,12 @@ int **matrisDimension(int **matris_A, int **matris_B, int *size);
 void *plusCounter(void *params); //int *row_A, int *row_B, int *cell, int row_size);
 int **transpoz(int **matris, int row, int col);
 int **creatMatris(int row, int col);
+void matrisFree(int **matris, int row);
 void printMatris(int **matris, int row, int col);
 
+
 int main(int argc, char const *argv[]){
+  srand(time(NULL));
   int **matris_A;
   int **matris_B;
   int **result;
@@ -54,8 +56,6 @@ int main(int argc, char const *argv[]){
   printMatris(matris_A, size[0], size[1]);
   printf("\n");
   
-  //sleep(1);
-
   matris_B = creatMatris(size[1], size[2]);  
   printMatris(matris_B, size[1], size[2]);
   printf("\n");
@@ -63,17 +63,24 @@ int main(int argc, char const *argv[]){
   result = matrisDimension(matris_A, matris_B, size);
   printMatris(result, size[0], size[2]);
 
-  free(matris_A);
-  free(matris_B);
-  free(result);
+  
+  printf("hata1\n");
+  matrisFree(matris_A, size[0]);
+  printMatris(matris_A, size[0], size[1]);
+
+  printf("hata2\n"); 
+  matrisFree(matris_B, size[1]);
+  printMatris(matris_B, size[1], size[2]);
+
+  printf("hata3\n");
+  matrisFree(result, size[0]);
+  printMatris(result, size[0], size[2]);
 
   return 0;
 }
 
 int **matrisDimension(int **matris_A, int **matris_B, int *size){
-  pthread_t workers[size[2]];
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
+  pthread_t workers[size[0]*size[2]];
   thread_params args;
 
   int **matris_result;
@@ -89,12 +96,14 @@ int **matrisDimension(int **matris_A, int **matris_B, int *size){
       args.row_B = matris_transpoz_B[r];
       args.cell = &matris_result[c][r]; 
       args.row_size = &size[1];
-      pthread_create(&workers[r], &attr, plusCounter, &args);
-      // plusCounter(matris_A[c], matris_transpoz_B[r], &matris_result[c][r], size[1]);
+      pthread_create(&workers[r], NULL, plusCounter, &args);
     }
   }
+  for (int i = 0; i < size[0]*size[2]; i++){
+    pthread_join(workers[i], NULL);
+  }
 
-  free(matris_transpoz_B);
+  matrisFree(matris_transpoz_B, size[2]);
 
   return matris_result;
 
@@ -102,10 +111,12 @@ int **matrisDimension(int **matris_A, int **matris_B, int *size){
 
 void *plusCounter(void *args){
   thread_params *params = args;
-  *params->cell = 0;
+  int result = 0;
   for (int i = 0; i < *params->row_size; i++){
-    *params->cell += params->row_A[i] * params->row_B[i];
+    result += params->row_A[i] * params->row_B[i];
   }
+  *params->cell = result;
+    printf("%d\n", result);
   pthread_exit(0);
 }
 
@@ -125,7 +136,6 @@ int **transpoz(int **matris, int col, int row){
 
 int **creatMatris(int row, int col){
   int **matris;
-  srand(time(NULL)+1);
 
   matris = (int **)malloc(sizeof(int) * row);
   for(int i = 0; i < row; i++){
@@ -137,12 +147,19 @@ int **creatMatris(int row, int col){
   return matris;
 }
 
+void matrisFree(int **matris, int row){
+  int r = row;
+  while(r) 
+    free(matris[--r]);
+  free(matris[r]);
+}
+
 void printMatris(int **matris, int row, int col){
   printf("=>%p\n", matris);
-  for(int i = 0; i < row; i++){     
-    printf("=>%p\t", matris[i]);
-    for(int j = 0; j < col; j++){
-      printf("%d ", matris[i][j]);
+  for(int r = 0; r < row; r++){     
+    printf("=>%p\t", matris[r]);
+    for(int c = 0; c < col; c++){
+      printf("%d ", matris[r][c]);
     }
     printf("\n");
   }
